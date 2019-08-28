@@ -111,17 +111,17 @@ public interface Queue<T> extends IQueue<T> {
             return true;
         }
 
-        // Grow the array by 50% and rearrange to make sequential
+        // Triple the size of the underlying array and rearrange to make sequential
         private void grow(int size) {
             int growSize = (size + (size<<1));
             T[] temp = (T[]) new Object[growSize];
             // Since the array can wrap around, make sure you grab the first chunk 
             int adjLast = lastIndex % array.length;
-            if (adjLast < firstIndex) {
-                System.arraycopy(array, 0, temp, array.length-adjLast, adjLast+1);
+            if (adjLast > 0 && adjLast <= firstIndex) {
+                System.arraycopy(array, 0, temp, array.length-adjLast, adjLast);
             }
             // Copy the remaining
-            System.arraycopy(array, firstIndex, temp, 0, array.length-firstIndex);
+            System.arraycopy(array, firstIndex, temp, 0, array.length - firstIndex);
             array = null;
             array = temp;
             lastIndex = (lastIndex - firstIndex);
@@ -134,9 +134,9 @@ public interface Queue<T> extends IQueue<T> {
             T[] temp = (T[]) new Object[shrinkSize];
             // Since the array can wrap around, make sure you grab the first chunk 
             int adjLast = lastIndex % array.length;
-            int endIndex = (lastIndex>array.length)?array.length:lastIndex;
+            int endIndex = (lastIndex>array.length) ? array.length : lastIndex;
             if (adjLast <= firstIndex) {
-                System.arraycopy(array, 0, temp, array.length-firstIndex, adjLast);
+                System.arraycopy(array, 0, temp, array.length - firstIndex, adjLast);
             }
             // Copy the remaining
             System.arraycopy(array, firstIndex, temp, 0, endIndex-firstIndex);
@@ -563,7 +563,7 @@ public interface Queue<T> extends IQueue<T> {
             public T next() {
                 if (queue.firstIndex+index < queue.lastIndex) {
                     last = queue.firstIndex+index;
-                    return queue.array[queue.firstIndex+index++];
+                    return queue.array[(queue.firstIndex + index++) % queue.array.length];
                 }
                 return null;
             }
